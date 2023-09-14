@@ -1,0 +1,24 @@
+/* --- might have several stylesheets, each dedicated to one aspect of your page (text, layout, input, etc.) or later on one per visualisation module. SEE vars.css stylesheet for variables */
+
+@import 'vars.css';
+
+h1{
+    color: green;
+    font-family: var(--font-title);
+}
+
+/* default for paragraphs */
+p{
+    color: tomato;
+    font-family: var(--font-text);
+}
+
+/* paragraphs with class 'myClass' */
+p.myClass{
+    color: teal;
+}
+
+/* paragraphs with id 'myId' */
+p#myId{
+    color: goldenrod;
+}
