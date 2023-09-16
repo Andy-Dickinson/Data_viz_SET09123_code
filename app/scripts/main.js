@@ -15,8 +15,11 @@ console.log('book1:', book1.available);
 book1.reserve = true;
 console.log('book1:', book1.available);
 
-// const book2 = new ComicBook('myNextBook', 'Andy', 'illustrating co');
-// console.log('book2 illustrator:', book2.illustrator);
+// class ComicBook extends Book
+import ComicBook from './Book.js';
+// import ComicBook from './ComicBook.js';
+const book2 = new ComicBook('myComic', 'Andy', 'illustrating co');
+console.log('book2 illustrator:', book2.illustrator);
 
 
 'use strict';               // to prevent us from overwriting important stuff
