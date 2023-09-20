@@ -1,6 +1,6 @@
 // A class representing a book
 
-// default means that the class is the only thing exported
+// default means that the class is the only thing exported - default export
 export default class Book{
 
     // private fields denoted with #
@@ -36,6 +36,7 @@ export default class Book{
     }
 }
 
+// named export
 export class ComicBook extends Book{
 
     illustrator;
