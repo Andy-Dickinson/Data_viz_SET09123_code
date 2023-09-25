@@ -1,6 +1,8 @@
 /* --- might have several stylesheets, each dedicated to one aspect of your page (text, layout, input, etc.) or later on one per visualisation module. SEE vars.css stylesheet for variables */
 
 @import 'vars.css';
+@import 'barchart.css';
+@import 'bubblechart.css';
 
 h1{
     color: green;

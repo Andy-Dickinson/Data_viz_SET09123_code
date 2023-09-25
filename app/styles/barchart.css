@@ -1,0 +1,11 @@
+/* adds boarder to the barchart */
+svg.barchart {
+    border: solid 1px #333;
+}
+
+/* adds a rule for the bars themselves - fill and stroke (outline colour and width) */
+svg.barchart > rect.bar {
+    fill: #4aba57;
+    stroke: #16381a;
+    stroke-width: 2px;
+}

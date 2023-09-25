@@ -74,7 +74,8 @@ bars = barSvg.selectAll('rect')
 // creates rectangle elements - see in DOM elements tab
 bars = barSvg.selectAll('rect')
     .data(dogs, d=>d.breed)
-    .join('rect');
+    .join('rect')
+    .classed('bar', true); // only here in this example to stop empty rectangle elements being added (as we add class 'bar' elements in example below)
 // equivalent to:
 // let bars = barSvg.selectAll('rect')
 //     .data(dogs, d=>d.breed)
@@ -96,14 +97,15 @@ bars = barSvg.selectAll('rect')
 // set these attributes using .attr method
 // to give them a value based on the data, use an accessor function ((d,i)=>{...})
 // bars will be positionned horizontally based on their index, every 40 pixels, with an offset of 5 pixels. They will also have their height based on their value of count (factored to have it fit inside the svg).
-bars = barSvg.selectAll('rect')
+bars = barSvg.selectAll('rect.bar')  // reflects the fact that classed method below adds a class 'bar' to rectangle elements. This will now only select rectangle elements with the class 'bar'
     .data(dogs, d=>d.breed)
     .join('rect')
+    .classed('bar', true)  // adds class 'bar' to rectangle elements
     .attr('x', (d, i)=>i*40+5) // datas index is used to determine where each bar starts on the x axis. The +5 has effect of shifting entire graph right
     .attr('y', d=>500-(d.count*0.25))  // datas count value is used to determine where the top of each bar starts (height of the bar chart here is 500)
     .attr('height', d=>d.count*0.25) // height of each bar based on data
     .attr('width', 40) // width of each bar
-    .style('fill', d=>d.count<400?'#ba4a53':null) // each bar fill colour
+    .style('fill', d=>d.count<400?'#ba4a53':null) // each bar fill colour. This is in the format condition?value_if_true:value_if_false
     .style('stroke', d=>d.count<400? '#381619':null); // outline of each bar colour
     
 
