@@ -6,10 +6,31 @@
         <script src="./libs/d3.v7.min.js"></script>
         <script src="./js/demo1.js"></script> <!-- call with makeDemo1()-->
         <script src="./js/demo2.js"></script> <!-- call with makeDemo2()-->
+        <script src="./js/demo3.js"></script> <!-- call with makeDemo3() -->
+
+        <script>
+            // function to make a list and interpolate between colours of list items on click
+            function makeList() {
+                var vs = [ "From East", "to West,", "at Home", "is Best" ];
+
+                d3.select( "body" )
+                    .append( "ul" ).selectAll( "li" ) // appends an ul element then creates an empty placeholder for the list items
+                    .data(vs).enter()  // dataset is bound to selection
+                    .append( "li" ).text( d => d )  // li appended for each data point and populated with values from dataset
+                    .on( "click", function () {  // registers a callback for the named event type
+                        this.toggleState = !this.toggleState; // keeps track of toggle state
+                        d3.select( this ) // to operate on it using method chaining, current node needs to be wrapped in a selection
+                            .transition().duration(1000)  // d3 interpolates between current states of list item
+                            .style("color", this.toggleState?"red":"black"); // new color selected based on current state
+                    });
+            }
+        </script>
     </head>
 
-    <body onload="makeDemo2()">  <!-- calls function when HTML page is fully loaded --> 
+    <body onload="makeList()">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
+
         <svg id="demo1" width="600" height="300"
             style="background: lightgray;"></svg>
+
     </body>
 </html>

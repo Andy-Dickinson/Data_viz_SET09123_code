@@ -1,3 +1,5 @@
+// may need to change 'onload' on index.html
+
 function makeDemo1() {
     d3.tsv( "./data_files/examples-simple.tsv" )  // loads/fetches data 
         .then( function( data ) {   // The tsv() function, like all functions in the JavaScript Fetch API, returns a JavaScript Promise object. A Promise is an object that packages a result set and a callback, and invokes the callback when the result set is complete and ready for processing. A Promise provides the then() function to register the desired callback to invoke. The callback to be invoked when the file is loaded is defined as an anonymous function, which receives the content of the data file as argument.
