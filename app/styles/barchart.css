@@ -1,4 +1,4 @@
-/* adds boarder to the barchart */
+/* adds boarder to the barchart svg element class*/
 svg.barchart {
     border: solid 1px #333;
 }

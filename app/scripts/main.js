@@ -1,5 +1,11 @@
 'use strict';
 
+// !!!!! REMEMBER - to add a div element in index.html
+// SVG charts are upside down on y axis, remember this when setting domain
+// Styling - each chart should have own css file, imported to main.css
+// Add chart boarder by referring to svg element class name
+
+
 // BAR CHART --------------------------------------------------------------------------------------------------------------------------
 
 // To set up elements for a barchart
@@ -101,7 +107,7 @@ bars = barSvg.selectAll('rect.bar')  // reflects the fact that classed method be
     .data(dogs, d=>d.breed)
     .join('rect')
     .classed('bar', true)  // adds class 'bar' to rectangle elements
-    .attr('x', (d, i)=>i*40+5) // datas index is used to determine where each bar starts on the x axis. The +5 has effect of shifting entire graph right
+    .attr('x', (d, i)=>i*40+5) // datas index is used to determine where each bar starts on the x axis. The +5 has effect of shifting/moving entire graph right
     .attr('y', d=>500-(d.count*0.25))  // datas count value is used to determine where the top of each bar starts (height of the bar chart here is 500)
     .attr('height', d=>d.count*0.25) // height of each bar based on data
     .attr('width', 40) // width of each bar
@@ -135,3 +141,115 @@ let bubbles = bubbleSvg.selectAll('circle')
     .style('stroke', 'orange');
 
 // -------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+// lab 4 - shapes -------------------------------------------------------------------------------------------------------------------------------------
+
+const width = 800;
+const height = 600;
+
+// Dataset
+// y = year, c = registration counts
+let grHistoric = [{y:2011,c:8081},
+                  {y:2012,c:7085},
+                  {y:2013,c:7117},
+                  {y:2014,c:6977},
+                  {y:2015,c:6928},
+                  {y:2016,c:7232},
+                  {y:2017,c:7846},
+                  {y:2018,c:7794},
+                  {y:2019,c:8422},
+                  {y:2020,c:8653}]; 
+
+// Sort data by y attribute (year)
+let grHist_sorted = d3.sort(grHistoric, d => d.y);
+
+
+// ---------- Line chart --------------------------------
+
+// selects div element as top selection - must be created in index.html
+let lineContainer = d3.select('div#line1');
+
+// creates svg elements
+let lineSVG = lineContainer.append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .classed('lineChart', true);
+
+// scales x axis from data y attributes min and max to 0 and chart width
+let line_scaleX = d3.scaleLinear()
+    .domain([d3.min(grHist_sorted, d => d.y)-1, d3.max(grHist_sorted, d => d.y)+1])
+    .range([0, width]);
+// scales y axis from data c attributes min and max to 0 and chart height
+let line_scaleY = d3.scaleLinear()
+    .domain([d3.max(grHist_sorted, d => d.c)*1.1, 0])  // could go to data minimum, d3.min(grHist_sorted, d => d.c) but effectively zooms in chart on y-axis. *1.1 is used to stop data points being on edge of chart.
+    .range([0, height]);
+
+// Create x and y axis generators
+let line_x_axisGen = d3.axisTop(line_scaleX);
+let line_y_axisGen = d3.axisRight(line_scaleY);
+
+// Appends x-axis to the chart within the group element with class 'x-axis'
+lineSVG.append('g')
+    .attr('class', 'x-axis')
+    .attr('transform', "translate(0," + height + ")") // moves x-axis to bottom of chart
+    .call(line_x_axisGen);
+
+// Hides first and last ticks of x-axis
+d3.selectAll('.x-axis .tick')  // selects all elements of class 'tick' within class 'x-axis'
+    .filter((d, i, nodes) => i === 0 || i === nodes.length - 1)
+    .attr('visibility', 'hidden');
+
+// Appends y-axis to the chart within the group elenent with class 'y-axis'
+lineSVG.append('g')
+    .attr('class', 'y-axis')
+    .call(line_y_axisGen);
+
+// creates a line generator
+let lineGen = d3.line()
+    .curve(d3.curveLinear)  // curveCardinal smooths out the curve
+    .x(d => line_scaleX(d.y))  // uses y attribute for x axis
+    .y(d => line_scaleY(d.c)); // uses c attribute for y axis
+
+// creates a path, joins datum
+// draws with the line generator
+let line = lineSVG.append('path')
+    .datum(grHist_sorted)
+    .attr("fill", "none")
+    .attr("stroke", "coral")
+    .attr("stroke-width", 3)
+    .attr('d', lineGen);
+
+
+// --------------- Pie/Donut Chart ----------------------
+
+// selects div element as top level selection
+let pieContainer = d3.select('div#pie_donut');
+
+// creates svg elements
+let pieSVG = pieContainer.append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .classed('pieChart', true);
+
+// creates a pie generator
+let pieGen = d3.pie().padAngle(0.02)
+    .sort(null).value(d => d.c);
+
+// creates a transformed dataset
+let pieData = pieGen(grHist_sorted);
+
+// creates an arc generator
+// (creates SVG paths representing circles arcs)
+let arcGen = d3.arc()
+    .innerRadius(width/4)
+    .outerRadius(width/2 - 5);
+
+// draws the arcs
+let arcs = pieSVG.selectAll('path')
+    .data(pieData, d => d.data.y)
+    .join('path')
+    .attr('fill', 'cadetblue').attr('fill-opacity', 0.8)
+    .attr('stroke', 'cadetblue').attr('stroke-width', 2)
+    .attr('d', arcGen);

@@ -1,4 +1,4 @@
-/* adds boarder to the bubblechart */
+/* adds boarder to the bubblechart svg element class */
 svg.bubblechart {
     border: solid 1px #333;
 }

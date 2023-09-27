@@ -3,6 +3,8 @@
 @import 'vars.css';
 @import 'barchart.css';
 @import 'bubblechart.css';
+@import 'line1.css';
+@import 'pie_donut.css';
 
 h1{
     color: green;

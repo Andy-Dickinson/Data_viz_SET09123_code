@@ -1,0 +1,4 @@
+/* adds boarder to the lineChart svg element class*/
+svg.lineChart {
+    border: solid 1px #333;
+}
