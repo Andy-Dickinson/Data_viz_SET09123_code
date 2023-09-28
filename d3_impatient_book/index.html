@@ -10,6 +10,8 @@
         <script src="./js/demo3.js"></script> <!-- call with makeDemo3() -->
         <script src="./js/joining_on_a_key.js"></script>  <!-- call with makeKeys() -->
         <script src="./js/generalUpdatePattern.js"></script> <!-- call with makeUpdate() -->
+        <script src="./js/insert_and_sort.js"></script> <!-- call with insert_sort() -->
+        <script src="./js/symbols.js"></script> <!-- call with makeSymbols() -->
 
         <script>
             // function to make a list and interpolate between colours of list items on click
@@ -30,7 +32,7 @@
         </script>
     </head>
 
-    <body onload="makeDemo1(); makeKeys(); makeUpdate();">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
+    <body onload="makeDemo1(); makeKeys(); makeUpdate(); insert_sort(); makeSymbols();">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
 
         <svg id="demo1" width="600" height="300"
             style="background: lightgray;"></svg>    
@@ -40,6 +42,12 @@
 
         <svg id="update" width="600" height="300"
             style="background: lightgray;"></svg>   
+            
+        <ul id="sort" width="600" height="300"
+            style="background: lightgray;"></ul>   
+
+        <svg id="symbols" width="600" height="300"
+            style="background: lightgray;"></svg>
 
     </body>
 </html>
