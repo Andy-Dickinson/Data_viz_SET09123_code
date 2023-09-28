@@ -4,9 +4,12 @@
     <head>
         <meta charset="utf-8">
         <script src="./libs/d3.v7.min.js"></script>
+        <!-- Call all of the following below in body take onload -->
         <script src="./js/demo1.js"></script> <!-- call with makeDemo1()-->
         <script src="./js/demo2.js"></script> <!-- call with makeDemo2()-->
         <script src="./js/demo3.js"></script> <!-- call with makeDemo3() -->
+        <script src="./js/joining_on_a_key.js"></script>  <!-- call with makeKeys() -->
+        <script src="./js/generalUpdatePattern.js"></script> <!-- call with makeUpdate() -->
 
         <script>
             // function to make a list and interpolate between colours of list items on click
@@ -27,10 +30,16 @@
         </script>
     </head>
 
-    <body onload="makeList()">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
+    <body onload="makeDemo1(); makeKeys(); makeUpdate();">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
 
         <svg id="demo1" width="600" height="300"
-            style="background: lightgray;"></svg>
+            style="background: lightgray;"></svg>    
+    
+        <svg id="key" width="600" height="300"
+            style="background: lightgray;"></svg>   
+
+        <svg id="update" width="600" height="300"
+            style="background: lightgray;"></svg>   
 
     </body>
 </html>
