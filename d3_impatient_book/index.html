@@ -12,6 +12,8 @@
         <script src="./js/generalUpdatePattern.js"></script> <!-- call with makeUpdate() -->
         <script src="./js/insert_and_sort.js"></script> <!-- call with insert_sort() -->
         <script src="./js/symbols.js"></script> <!-- call with makeSymbols() -->
+        <script src="./js/pie_chart_demo.js"></script> <!-- call with makePie() -->
+        <script src="./js/reusable_component.js"></script> <!-- call with makeSticker() -->
 
         <script>
             // function to make a list and interpolate between colours of list items on click
@@ -32,7 +34,7 @@
         </script>
     </head>
 
-    <body onload="makeDemo1(); makeKeys(); makeUpdate(); insert_sort(); makeSymbols();">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
+    <body onload="makeDemo1(); makeKeys(); makeUpdate(); insert_sort(); makeSymbols(); makePie(); makeSticker();">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
 
         <svg id="demo1" width="600" height="300"
             style="background: lightgray;"></svg>    
@@ -47,6 +49,12 @@
             style="background: lightgray;"></ul>   
 
         <svg id="symbols" width="600" height="300"
+            style="background: lightgray;"></svg>
+
+        <svg id="pie" width="600" height="300"
+            style="background: lightgray;"></svg>
+
+        <svg id="sticker" width="600" height="300"
             style="background: lightgray;"></svg>
 
     </body>
