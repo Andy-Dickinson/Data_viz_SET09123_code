@@ -3,9 +3,13 @@ svg.barchart {
     border: solid 1px #333;
 }
 
+.barchart > g {
+    margin: 50px;
+}
+
 /* adds a rule for the bars themselves - fill and stroke (outline colour and width) */
-svg.barchart > rect.bar {
+svg.barchart > g > rect.bar {
     fill: #4aba57;
-    stroke: #16381a;
+    stroke: #d3210d;
     stroke-width: 2px;
 }
