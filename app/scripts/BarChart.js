@@ -30,7 +30,7 @@ export default class BarChart {
 
 
     // Render method to create or update the bar chart
-    render(data, categoryKey, categoryCount, barOffset, domainMin=0) {
+    render(data, categoryKey, categoryCount, barOffset, domainMin=0, domainMax='undefined') {
 
         var barsG = this.svg.selectAll('g');
         var selection = barsG.selectAll('rect.bar');
@@ -41,16 +41,17 @@ export default class BarChart {
 
         //  y axis
         // Define the input domain (data range)
-        const dataMin = d3.min(data, d => d[`${categoryCount}`]);
-        const dataMax = d3.max(data, d => d[`${categoryCount}`]);
+        if (domainMax === 'undefined'){
+            domainMax = (d3.max(data, d => d[`${categoryCount}`])); // used to map yScale
+        }
 
-        // Define the chart height (visual representation)
-        const chartHeight = this.height - this.margin[0] - this.margin[1]; // svg height - top margin - bottom margin
+        // Define the chart height (visual representation) - g element
+        const g_height = this.height - this.margin[0] - this.margin[1]; // svg height - top margin - bottom margin
 
         // Create a linear scale
         const yScale = d3.scaleLinear()
-            .domain([domainMin, dataMax*1.01]) // maps from slightly higher domain than data to allow space at top of chart
-            .range([this.margin[0], chartHeight + this.margin[0]]); // from top margin to (chartHeight + top margin)
+            .domain([domainMin, domainMax])
+            .range([0, g_height]); // from top margin to (g_height + top margin)
 
 
         // x axis
@@ -58,20 +59,19 @@ export default class BarChart {
         var dataUniqueSet = new Set(data.map(d => d[`${categoryKey}`]));  // maps data to be plotted in each bar to a set (to count number of bars for graph)
         var catQuantity = dataUniqueSet.size; // number of bars
 
-        // (((width of svg - left margin - right margin) -  barOffset) / (number of bars + barOffset(for end of chart edge)) - barwidth
+        // (((width of svg - left margin - right margin) -  barOffset) / number of bars ) - barwidth
         // (width of visual space - barOffset for end of chart / number of bars) - barOffset
         var barWidth = (((this.width - this.margin[2] - this.margin[3]) - barOffset ) / catQuantity) - barOffset; 
-
 
         // Create D3 selections for data binding
         var barsBinded = selection
             .data(data, d => d[`${categoryKey}`]) // binds data by category
             .join('rect')
             .classed('bar', true)
-            .attr('height', d => yScale(d[`${categoryCount}`])) // height of each bar factored to fit
+            .attr('height', d => yScale(d[`${categoryCount}`])) // height of each bar
             .attr('width', barWidth)  // width of each bar
             .attr('x', (d, i) => i * barWidth + (i + 1) * barOffset) // horizontal coordinate origin > based on their index every bar width and offset
-            .attr('y', d => this.height - yScale(d[`${categoryCount}`])); // vertical coordinate origin > height of chart minus bars height
+            .attr('y', d => g_height - yScale(d[`${categoryCount}`])); // vertical coordinate origin (top left corner of each bar) > (height of chart - height of bar)
 
         // Apply styles, colors, and other attributes based on the data
         barsBinded.style('fill', d => d[`${categoryCount}`] < 400 ? '#ba4a53' : null)
