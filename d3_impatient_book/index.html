@@ -14,6 +14,7 @@
         <script src="./js/symbols.js"></script> <!-- call with makeSymbols() -->
         <script src="./js/pie_chart_demo.js"></script> <!-- call with makePie() -->
         <script src="./js/reusable_component.js"></script> <!-- call with makeSticker() -->
+        <script src="./js/custom_tick_marks.js"></script> <!-- call with makeTicks() -->
 
         <script>
             // function to make a list and interpolate between colours of list items on click
@@ -34,7 +35,7 @@
         </script>
     </head>
 
-    <body onload="makeDemo1(); makeKeys(); makeUpdate(); insert_sort(); makeSymbols(); makePie(); makeSticker();">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
+    <body onload="makeDemo1(); makeKeys(); makeUpdate(); insert_sort(); makeSymbols(); makePie(); makeSticker(); makeTicks();">  <!-- calls function when HTML page is fully loaded. Change this to either load function makeList above or one of the demo file functions 'makeDemo#' --> 
 
         <svg id="demo1" width="600" height="300"
             style="background: lightgray;"></svg>    
@@ -55,6 +56,9 @@
             style="background: lightgray;"></svg>
 
         <svg id="sticker" width="600" height="300"
+            style="background: lightgray;"></svg>
+
+        <svg id="ticks" width="600" height="300"
             style="background: lightgray;"></svg>
 
     </body>
