@@ -1,44 +1,35 @@
 <!DOCTYPE html>
-<html>
-    <!-- Set the document's character encoding and viewport -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=1920, initial-scale=1.0">
+    <html>  
+        <!-- Set the document's character encoding and viewport -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=1920, initial-scale=1.0">
 
-    <!-- Title of web page -->
-    <title>Page Title</title>
+        <!-- Title of web page -->
+        <title>Charts</title>
 
-    <!-- Libraries and stylesheets imports -->
-    <link rel="stylesheet" href="styles/main.css">
+        <!-- Libraries and stylesheets imports -->
+        <link rel="stylesheet" href="styles/main.css">
 
-    <!-- Scripts -->
-    <!-- d3 library -->
-    <script src="libs/d3.v7.min.js"></script>
+        <!-- Scripts -->
+        <!-- d3 library -->
+        <script src="libs/d3.v7.min.js"></script>
 
-</head>
-<body>
+    </head>
+    <body>
 
-    <!-- Page body -->
+        <!-- Page body -->
 
-    <!-- div elements for bar and bubble charts -->
-    <div id="bar1"></div>
-    <div id="bubble1"></div>
-    <!-- <div id="line1"></div> -->
-    <!-- <div id="pie_donut"></div> -->
-
-    <!-- allows modules to be imported and used -->
-    <!-- Why are we loading our main script last?
-        JavaScript is a just-in-time compiled language, as soon as it gets loaded, it gets executed. Since we will be selecting elements of our page in the main script, it's best to ensure they exist first. It's the same reason why we import all third-party libraries before loading our own scripts. -->
-    <script type="module" src="scripts/main.js"></script> 
+        <!-- div elements for bar and bubble charts -->
+        <div id="bar1"></div>
+        <div id="bubble1"></div>
+        <div id="line1"></div>
+        <!-- <div id="pie_donut"></div> -->
 
 
-    
-    <!-- example heading/paragraphs -->
-    <!-- <h1>my heading</h1>
-    <div>
-        <p>1st para</p>
-        <p class="myClass">2nd para</p>
-        <p id="myId">3rd para</p>
-    </div> -->
+        <!-- allows modules to be imported and used -->
+        <!-- Why are we loading our main script last?
+            JavaScript is a just-in-time compiled language, as soon as it gets loaded, it gets executed. Since we will be selecting elements of our page in the main script, it's best to ensure they exist first. It's the same reason why we import all third-party libraries before loading our own scripts. -->
+        <script type="module" src="scripts/main.js"></script> 
 
-</body>
+    </body>
 </html>

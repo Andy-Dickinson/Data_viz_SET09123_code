@@ -5,34 +5,39 @@ import Chart from './Chart.js';
 
 
 /*
-Class to build Bar charts
+Class to build Line charts
 Extends class Chart
-Uses scaleBand for x-axis
 */
-export default class BarChart extends Chart{
+export default class LineChart extends Chart{
 
-    x_domain;
 
     constructor(container, margin=[50,50,50,30], width=600, height=400) {
         super(container, margin, width, height);
 
-        this.svg.classed('barchart', true);
+        this.svg.classed('linechart', true);
     }
 
 
-    /* Render method to create or update the bar chart
+    /* Render method to create or update the line chart
     - categoryKey: used to look up bar categories
     - categoryCount: used to look up y-axis values
     All other parameters are optional
     Padding MUST be less than 1, defaults to 0.15
     Tick sizes default to 6
     */
-    render(data, categoryKey, categoryCount, x_title, y_title, padding, x_tickSize, y_tickSize) {
+    render(data, x_key, y_key, x_title, y_title, x_tickSize, y_tickSize) {
 
         this.data = data;
-        this.x_key = `${categoryKey}`;
-        this.y_key = `${categoryCount}`;
-        this.x_domain = data.map(d => d[`${categoryKey}`]);
+        this.x_key = `${x_key}`;
+        this.y_key = `${y_key}`;
+        this.x_domain = data.map(d => d[`${x_key}`]);
+
+        // checks if data is 1d or 2d - if more than one line is required
+        if (data.every(d => !Array.isArray(d))) {
+            console.log("1d");
+        } else{
+            console.log("2d");
+        }
 
         // x-axis is bandScale
         this.updateScalesBand(padding);

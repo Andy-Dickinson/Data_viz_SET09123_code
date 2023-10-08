@@ -1,4 +1,7 @@
-/* adds boarder to the bubblechart svg element class */
-svg.bubblechart {
-    border: solid 1px #333;
+/* adds a rule for the circles themselves - fill and stroke (outline colour and width) 
+selects all circles with class pie, where parent is a g element with class chart*/
+g.chart > circle.pie {
+    fill: #4aba57;
+    stroke: #d3210d;
+    stroke-width: 2px;
 }

@@ -1,47 +1,86 @@
-export default class BubbleChart {
+'use strict';
 
-    /*
-    Constructor for BubbleChart
-    - container: DOM selector
-    - width: visualisation width
-    - height: visualisation height
-    - margin: chart area margins [top, bottom, left, right]
-    */
-    constructor(containerSelector, width, height, margin) {
-        // initialize width, height and margin
-        this.width = width;
-        this.height = height;
-        this.margin = margin;
+// imports classes
+import Chart from './Chart.js';
 
-        // Create an SVG element inside the container
-        this.svg = d3.select(containerSelector)
-            .append('svg')
-            .attr('width', this.width)
-            .attr('height', this.height)
-            .classed('bubblechart', true);
+/*
+Class to build bubble charts
+Extends class Chart
+*/
+export default class BubbleChart extends Chart {
 
-        // appends g element and adds margins
-        this.chart = this.svg.append('g')
-            .attr('transform', `translate(${this.margin[2]},${this.margin[0]})`);
+    binding_key;
+    radius_key;
+    scaleR;
+
+    constructor(container, margin=[50,50,50,30], width=600, height=400) {
+        super(container, margin, width, height);
+
+        this.svg.classed('bubblechart', true);
     }
 
-    // Render method to create or update the bubble chart
-    render(data) {
-        // Remove existing bubbles before rendering new ones
-        this.svg.selectAll('circle.pie').remove();
 
-        // Create D3 selections for data binding
-        let bubbles = this.svg.selectAll('circle.pie')
-            .data(data, d => d.breed)
-            .enter() // Enter selection for new data
-            .append('circle')
+    /* Render method to create or update the bubble chart
+    - binding_key: used to bind data
+    - x_key: used to look up x-axis values
+    - y_key: used to look up y-axis values
+    - radius_key: used to look up bubble radius
+    All other parameters are optional
+    min and max radius is based off chart size and data length if not specified
+    Tick sizes default to 6
+    */
+    render(data, binding_key, x_key, y_key, radius_key, x_title, y_title, max_radius, min_radius, x_tickSize, y_tickSize) {
+
+        this.binding_key = `${binding_key}`;
+        this.x_key = `${x_key}`;
+        this.y_key = `${y_key}`;
+        this.radius_key = `${radius_key}`;
+        // data sorted in descending order so as to ensure small bubbles are plotted ontop of larger ones
+        this.data = d3.sort(data, (a, b) => b[this.radius_key] - a[this.radius_key]);
+
+        // sets scales and axes
+        this.updateScalesRadius(max_radius, min_radius);
+        this.addAxes(x_title, y_title, x_tickSize, y_tickSize);
+
+
+        let barsG = this.svg.selectAll('g.chart');
+        let circles = barsG.selectAll('circle.pie');
+
+        // Remove existing bars before rendering new ones
+        circles.remove();
+
+
+        // Create D3 rectangles for data binding
+        let barsBinded = circles
+            .data(data, d => d[this.binding_key]) // binds data
+            .join('circle')
             .classed('pie', true)
-            .attr('cx', d => d.weight * 10)
-            .attr('cy', d => d.height * 6)
-            .attr('r', d => d.count * 0.0065);
+            .attr('cx', d => this.scaleX(d[this.x_key])) // x-axis coordinate
+            .attr('cy', d => this.scaleY(d[this.y_key]))  // y-axis scale accounts for upside down mapping
+            .attr('r', d => this.scaleR(d[this.radius_key])); // radius
+    }
 
-        // Apply styles, colors, and other attributes based on the data
-        bubbles.style('fill', d => d.count < 400 ? '#ba4a53' : null)
-            .style('stroke', d => d.count < 400 ? '#381619' : null);
+
+
+    updateScalesRadius(max_radius, min_radius) {
+
+        // first scales linear which sets chart width and height along with x and y axis domains and scales
+        super.updateScalesLinear();
+
+        // sets max_radius if undefined to lowest value of chart height or width / number of data points 
+        if (max_radius === undefined) {
+            max_radius = Math.min(this.chartHeight, this.chartWidth) / this.data.length;
+        }
+
+        // sets min_radius if undefined to max_radius / number of data points
+        if (min_radius === undefined) {
+            min_radius = max_radius / this.data.length;
+        }
+
+        // domainR - takes lowest value either from dataset or 0 to data max
+        let domainR = [Math.min(0, d3.min(this.data, d => d[this.radius_key])), d3.max(this.data, d => d[this.radius_key])];
+        // rangeR - highest value of 0 or min_radius to lowest value of max_radius or data max
+        let rangeR = [Math.max(0, min_radius), Math.min(max_radius, d3.max(this.data, d => d[this.radius_key]))];
+        this.scaleR = d3.scaleLinear(domainR, rangeR);
     }
 }

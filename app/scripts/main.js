@@ -5,6 +5,7 @@
 // imports classes
 import BarChart from './BarChart.js';
 import BubbleChart from './BubbleChart.js';
+import LineChart from './LineChart.js';
 
 let dogsData = [{breed:'Golden Retriever', count:8653, weight: 39.5, height: 56},
     {breed:'Alaskan Malamute', count:261, weight: 36, height: 61},
@@ -17,11 +18,13 @@ let dogsData = [{breed:'Golden Retriever', count:8653, weight: 39.5, height: 56}
     {breed:'German Shepherd', count:7067, weight: 31, height: 60},
     {breed:'Swiss Shepherd', count:110, weight: 32.5, height: 60.5}]
 
-// Create instances of BarChart and BubbleChart
-let barchart1 = new BarChart('div#bar1', 900, 400, [50, 50, 70, 30]);
-// let bubblechart1 = new BubbleChart('div#bubble1', 800, 500, [5,5,5,5]);
 
-// Render data using the render method
+
+// Create instances of Bar Chart
+let barchart1 = new BarChart('div#bar1', [50,50,70,30], 900);
+
+// Render data for barChart using the render method
+// binds on and x-axis category taken from breed, y-axis: count
 barchart1.render(dogsData, 'breed', 'count', "Breed", "Registration count");
 
 // Example of applying styles, colors, and other attributes based on the data
@@ -31,5 +34,34 @@ d3.select('div#bar1')
     .style('stroke-width', '2px');
 
 
-// bubblechart1.render(dogsData); // Use the same data for both charts
+    
+// Bubble Chart
+let bubblechart1 = new BubbleChart('div#bubble1', [50,50,70,30], 900);
+// binds on 'breed', x-axis: weight, y-axis: height, radius: count
+bubblechart1.render(dogsData, 'breed', 'weight', 'height', 'count', "Weight", "Height"); // Use the same data as bar chart
 
+// data driven styling
+d3.select('div#bubble1')
+    .selectAll('g.chart').selectAll('circle.pie').style('fill', d => d['count'] < 400 ? '#ba4a53' : null)
+    .style('stroke', d => d['count'] < 400 ? '#381619' : null)
+    .style('stroke-width', '2px');
+
+
+
+// Line Chart
+// Dataset
+// y = year, c = registration counts
+let grHistoric = [{y:2011,c:8081},
+                  {y:2012,c:7085},
+                  {y:2013,c:7117},
+                  {y:2014,c:6977},
+                  {y:2015,c:6928},
+                  {y:2016,c:7232},
+                  {y:2017,c:7846},
+                  {y:2018,c:7794},
+                  {y:2019,c:8422},
+                  {y:2020,c:8653}]; 
+
+
+let linechart1 = new LineChart('div#line1', [50,50,70,30], 900);
+linechart1.render(grHistoric, ['y','c'], 'c', "Year", "Registration Count");
