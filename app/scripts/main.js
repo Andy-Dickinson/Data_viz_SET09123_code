@@ -18,10 +18,10 @@ let dogsData = [{breed:'Golden Retriever', count:8653, weight: 39.5, height: 56}
     {breed:'Swiss Shepherd', count:110, weight: 32.5, height: 60.5}]
 
 // Create instances of BarChart and BubbleChart
-let barchart1 = new BarChart('div#bar1', 800, 500, [5,5,5,5]);    // ------------------- consider use of domains, see barchart.js, and axies lab
+let barchart1 = new BarChart('div#bar1');//, 800, 500, [100,100,100,100]); 
 // let bubblechart1 = new BubbleChart('div#bubble1', 800, 500, [5,5,5,5]);
 
 // Render data using the render method of each chart
-barchart1.render(dogsData, 'breed', 'count', 5);
+barchart1.render(dogsData, 'breed', 'count', "Bar Chart");
 // bubblechart1.render(dogsData); // Use the same data for both charts
 

@@ -1,7 +1,24 @@
 /*
-creates barchart contained within g element, contained in svg inside containerSelector
+creates barchart contained within g element, contained in SVG inside container passed
+margins are applied by transforming the g element within the svg element
 */
 export default class BarChart {
+
+    data;
+    svg; 
+    width; // width of SVG element
+    height; // height of SVG element
+    chart; // g element containing chart
+    axisX; // g element containing x-axis
+    axisY; // g element containing y-axis
+    chartHeight;
+    chartWidth;
+    margin; // array for margins around chart g element [top, bottom, left, right], applied as a transformation
+    #scaleX;
+    #scaleY;
+    #x; // x-axis units
+    #y; // y-axis units
+
 
     /*
     Constructor for BarChart
@@ -10,14 +27,14 @@ export default class BarChart {
     - height: visualisation height
     - margin: chart area margins [top, bottom, left, right]
     */
-    constructor(containerSelector, width, height, margin) {
+    constructor(container, width=600, height=400, margin=[50,50,50,50]) {
         // initialize width, height and margin
         this.width = width;
         this.height = height;
         this.margin = margin;
 
         // Create an SVG element inside the container
-        this.svg = d3.select(containerSelector)
+        this.svg = d3.select(container)
             .append('svg')
             .attr('width', this.width)
             .attr('height', this.height)
@@ -25,57 +42,104 @@ export default class BarChart {
 
         // appends g element and adds margins
         this.chart = this.svg.append('g')
-            .attr('transform', `translate(${this.margin[2]},${this.margin[0]})`); // moves g element down by top margin and right by left margin
+            .attr('transform', `translate(${this.margin[2]},${this.margin[0]})`) // moves g element righty by left margin and down by top margin
+            .classed('chart', true);
+
+        this.axisX = this.svg.append('g')
+            .attr('transform', `translate(${this.margin[2]}, ${this.height - this.margin[1]})`) // moves x-axis right by left margin and down by (height of svg - bottom margin)
+            .classed('axisX', true);
+
+        this.axisY = this.svg.append('g')
+        .attr('transform', `translate(${this.margin[2]}, ${ this.margin[0]})`) // moves y-axis right by left margin and down by (height - top margin)
+        .classed('axisY', true);
     }
 
 
-    // Render method to create or update the bar chart
-    render(data, categoryKey, categoryCount, barOffset, domainMin=0, domainMax='undefined') {
 
-        var barsG = this.svg.selectAll('g');
-        var selection = barsG.selectAll('rect.bar');
+    // Render method to create or update the bar chart
+    // padding MUST be less than 1, defaults to 0.15
+    render(data, categoryKey, categoryCount, x_title, padding) {
+
+        this.data = data;
+        this.#x = data.map(d=>d[`${categoryKey}`]);
+        this.#y = `${categoryCount}`;
+
+        // x-axis is bandScale
+        this.#updateScales(true, padding);
+        this.#addAxes(x_title);
+
+
+        let barsG = this.svg.selectAll('g.chart');
+        let rectangles = barsG.selectAll('rect.bar');
 
         // Remove existing bars before rendering new ones
-        selection.remove();
+        rectangles.remove();
 
 
-        //  y axis
-        // Define the input domain (data range)
-        if (domainMax === 'undefined'){
-            domainMax = (d3.max(data, d => d[`${categoryCount}`])); // used to map yScale
-        }
-
-        // Define the chart height (visual representation) - g element
-        const g_height = this.height - this.margin[0] - this.margin[1]; // svg height - top margin - bottom margin
-
-        // Create a linear scale
-        const yScale = d3.scaleLinear()
-            .domain([domainMin, domainMax])
-            .range([0, g_height]); // from top margin to (g_height + top margin)
-
-
-        // x axis
-        // Define the input domain (data range)
-        var dataUniqueSet = new Set(data.map(d => d[`${categoryKey}`]));  // maps data to be plotted in each bar to a set (to count number of bars for graph)
-        var catQuantity = dataUniqueSet.size; // number of bars
-
-        // (((width of svg - left margin - right margin) -  barOffset) / number of bars ) - barwidth
-        // (width of visual space - barOffset for end of chart / number of bars) - barOffset
-        var barWidth = (((this.width - this.margin[2] - this.margin[3]) - barOffset ) / catQuantity) - barOffset; 
-
-        // Create D3 selections for data binding
-        var barsBinded = selection
+        // Create D3 rectangles for data binding
+        let barsBinded = rectangles
             .data(data, d => d[`${categoryKey}`]) // binds data by category
             .join('rect')
             .classed('bar', true)
-            .attr('height', d => yScale(d[`${categoryCount}`])) // height of each bar
-            .attr('width', barWidth)  // width of each bar
-            .attr('x', (d, i) => i * barWidth + (i + 1) * barOffset) // horizontal coordinate origin > based on their index every bar width and offset
-            .attr('y', d => g_height - yScale(d[`${categoryCount}`])); // vertical coordinate origin (top left corner of each bar) > (height of chart - height of bar)
+            .attr('height', d => this.chartHeight - this.#scaleY(d[this.#y])) // height of each bar, accounts for upside down mapping
+            .attr('width', this.#scaleX.bandwidth())  // width of each bar
+            .attr('x', d=>this.#scaleX(d[`${categoryKey}`])) // horizontal coordinate origin - based on scaleBand
+            .attr('y', d => this.#scaleY(d[this.#y])); // vertical coordinate origin (top left corner of each bar) - move each bar down by its own scaled height (reverse mapping on y-axis)
 
+
+
+        // ----------- needs moving -----------------------
         // Apply styles, colors, and other attributes based on the data
-        barsBinded.style('fill', d => d[`${categoryCount}`] < 400 ? '#ba4a53' : null)
-            .style('stroke', d => d[`${categoryCount}`] < 400 ? '#381619' : null)
+        this.svg.selectAll('g.chart').selectAll('rect.bar').style('fill', d => d[this.#y] < 400 ? '#ba4a53' : null)
+            .style('stroke', d => d[this.#y] < 400 ? '#381619' : null)
             .style('stroke-width', '2px');
+    }
+
+
+    // scales linear default, scales band if scaleBand set to true
+    #updateScales(scaleBand=false, padding=0.15) {
+
+        this.chartWidth = this.width - this.margin[2] - this.margin[3],
+        this.chartHeight = this.height - this.margin[0] - this.margin[1];
+
+        let rangeX = [0, this.chartWidth],
+            rangeY = [this.chartHeight, 0];
+
+        // scales band or linear for x-axis
+        if (scaleBand === true) {
+            this.#scaleX = d3.scaleBand()
+                .domain(this.#x)
+                .range([0, this.chartWidth])
+                .padding(padding);
+        } else {
+            this.#scaleX = d3.scaleLinear()
+                .domain(Math.min(0, d3.min(this.data, d=>d[this.#x])), d3.max(this.data, d=>d[this.#x]))
+                .range(rangeX);
+        }
+
+        // y-axis
+        let domainY = [Math.min(0, d3.min(this.data, d=>d[this.#y])), d3.max(this.data, d=>d[this.#y])];
+
+        this.#scaleY = d3.scaleLinear(domainY, rangeY);
+    }
+
+
+    #addAxes(x_title=undefined) {
+
+        let xAxis = d3.axisBottom(this.#scaleX),
+            yAxis = d3.axisLeft(this.#scaleY);
+
+        this.axisX.call(xAxis);
+        this.axisY.call(yAxis);
+
+        if (x_title !== undefined) {
+        // x-axis title
+        this.svg.append("text")
+            .attr("class", "x-axis-title")
+            .attr("text-anchor", "middle")
+            .attr("x", (this.chartWidth / 2) + this.margin[2]) // center of chart + left margin
+            .attr("y", this.height - (this.margin[1] / 4)) // 1/4 of the bottom margin up from the bottom of svg chart
+            .text(x_title);
+        }
     }
 }

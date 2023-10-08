@@ -1,14 +1,15 @@
-/* adds boarder to the barchart svg element class*/
+/* adds boarder to the barchart svg element with class*/
 svg.barchart {
     border: solid 1px #333;
 }
 
-.barchart > g {
-    margin: 50px;
+/* adds a margin to the class barchart (this is the svg element) */
+.barchart {
+    margin: 5px;
 }
 
 /* adds a rule for the bars themselves - fill and stroke (outline colour and width) */
-svg.barchart > g > rect.bar {
+svg.barchart > g.chart > rect.bar {
     fill: #4aba57;
     stroke: #d3210d;
     stroke-width: 2px;
