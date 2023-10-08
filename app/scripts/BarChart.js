@@ -27,7 +27,7 @@ export default class BarChart {
     - height: visualisation height
     - margin: chart area margins [top, bottom, left, right]
     */
-    constructor(container, width=600, height=400, margin=[50,50,50,50]) {
+    constructor(container, width=600, height=400, margin=[50,50,50,30]) {
         // initialize width, height and margin
         this.width = width;
         this.height = height;
@@ -56,9 +56,11 @@ export default class BarChart {
 
 
 
+
     // Render method to create or update the bar chart
     // padding MUST be less than 1, defaults to 0.15
-    render(data, categoryKey, categoryCount, x_title, padding) {
+    // tick sizes default to 6
+    render(data, categoryKey, categoryCount, x_title, y_title, padding, x_tickSize, y_tickSize) {
 
         this.data = data;
         this.#x = data.map(d=>d[`${categoryKey}`]);
@@ -66,7 +68,7 @@ export default class BarChart {
 
         // x-axis is bandScale
         this.#updateScales(true, padding);
-        this.#addAxes(x_title);
+        this.#addAxes(x_title, y_title, x_tickSize, y_tickSize);
 
 
         let barsG = this.svg.selectAll('g.chart');
@@ -85,15 +87,9 @@ export default class BarChart {
             .attr('width', this.#scaleX.bandwidth())  // width of each bar
             .attr('x', d=>this.#scaleX(d[`${categoryKey}`])) // horizontal coordinate origin - based on scaleBand
             .attr('y', d => this.#scaleY(d[this.#y])); // vertical coordinate origin (top left corner of each bar) - move each bar down by its own scaled height (reverse mapping on y-axis)
-
-
-
-        // ----------- needs moving -----------------------
-        // Apply styles, colors, and other attributes based on the data
-        this.svg.selectAll('g.chart').selectAll('rect.bar').style('fill', d => d[this.#y] < 400 ? '#ba4a53' : null)
-            .style('stroke', d => d[this.#y] < 400 ? '#381619' : null)
-            .style('stroke-width', '2px');
     }
+
+
 
 
     // scales linear default, scales band if scaleBand set to true
@@ -120,14 +116,17 @@ export default class BarChart {
         // y-axis
         let domainY = [Math.min(0, d3.min(this.data, d=>d[this.#y])), d3.max(this.data, d=>d[this.#y])];
 
-        this.#scaleY = d3.scaleLinear(domainY, rangeY);
+        this.#scaleY = d3.scaleLinear(domainY, rangeY).nice();
     }
 
 
-    #addAxes(x_title=undefined) {
 
-        let xAxis = d3.axisBottom(this.#scaleX),
-            yAxis = d3.axisLeft(this.#scaleY);
+    
+    #addAxes(x_title=undefined, y_title=undefined, x_tickSize=6, y_tickSize=6) {
+
+        let xAxis = d3.axisBottom(this.#scaleX)
+                .tickSize(x_tickSize),
+            yAxis = d3.axisLeft(this.#scaleY).tickSize(y_tickSize);
 
         this.axisX.call(xAxis);
         this.axisY.call(yAxis);
@@ -135,11 +134,22 @@ export default class BarChart {
         if (x_title !== undefined) {
         // x-axis title
         this.svg.append("text")
-            .attr("class", "x-axis-title")
-            .attr("text-anchor", "middle")
-            .attr("x", (this.chartWidth / 2) + this.margin[2]) // center of chart + left margin
-            .attr("y", this.height - (this.margin[1] / 4)) // 1/4 of the bottom margin up from the bottom of svg chart
-            .text(x_title);
+                .attr("class", "x-axis-title")
+                .attr("text-anchor", "middle")
+                .attr("x", (this.chartWidth / 2) + this.margin[2]) // center of chart + left margin
+                .attr("y", this.height - (this.margin[1] / 4)) // 1/4 of the bottom margin up from the bottom of svg chart
+                .text(x_title);
+        }
+
+        if (y_title !== undefined) {
+            // y-axis title
+            this.svg.append("text")
+                .attr("class", "y-axis-title")
+                .attr("text-anchor", "middle")
+                .attr("x", -(this.chartHeight / 2) - this.margin[0]) // center of chart - top margin
+                .attr("y", 3*(this.margin[3] / 4)) // 3/4 of the left margin
+                .attr("transform", "rotate(-90)") // rotate the text to be vertical
+                .text(y_title);
         }
     }
 }
