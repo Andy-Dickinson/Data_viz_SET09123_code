@@ -5,7 +5,7 @@ import Chart from './Chart.js';
 
 
 /*
-Class to build bar charts
+Class to render bar charts
 Extends class Chart
 Uses scaleBand for x-axis
 */
