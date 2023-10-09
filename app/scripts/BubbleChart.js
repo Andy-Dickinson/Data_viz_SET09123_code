@@ -4,7 +4,7 @@
 import Chart from './Chart.js';
 
 /*
-Class to build bubble charts
+Class to render bubble charts
 Extends class Chart
 */
 export default class BubbleChart extends Chart {
@@ -43,14 +43,14 @@ export default class BubbleChart extends Chart {
         this.addAxes(x_title, y_title, x_tickSize, y_tickSize);
 
 
-        let barsG = this.svg.selectAll('g.chart');
-        let circles = barsG.selectAll('circle.pie');
+        let bubbles = this.svg.selectAll('g.chart');
+        let circles = bubbles.selectAll('circle.pie');
 
         // Remove existing bars before rendering new ones
         circles.remove();
 
 
-        // Create D3 rectangles for data binding
+        // Draws
         let barsBinded = circles
             .data(data, d => d[this.binding_key]) // binds data
             .join('circle')

@@ -1,4 +1,6 @@
 /* adds boarder to the lineChart svg element class*/
-svg.lineChart {
-    border: solid 1px #333;
+g.chart > path.line {
+    fill: none;
+    stroke: coral;
+    /* stroke-width: ; -- defined when rendering line chart, but can be overridden here */
 }

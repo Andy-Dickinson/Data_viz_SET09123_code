@@ -63,8 +63,14 @@ export default class Chart {
 
 
 
-    // sets scales linear, uses nice() method
-    updateScalesLinear() {
+    /* sets scales linear, uses nice() method by default
+        When x_zero / y_zero are false, uses data to define axis min
+        padding options adjusts domains so datapoints are not at chart edges
+    */
+    updateScalesLinear(x_zero=true, y_zero=true, nice=true, x_pad_left=0, x_pad_right=0, y_pad_bott=0, y_pad_top=0) {
+
+        let domainX;
+        let domainY;
 
         this.chartWidth = this.width - this.margin[2] - this.margin[3],
         this.chartHeight = this.height - this.margin[0] - this.margin[1];
@@ -73,12 +79,29 @@ export default class Chart {
             rangeY = [this.chartHeight, 0]; // accounts for upside down mapping
 
         // x-axis - takes lowest value either from dataset or 0
-        let domainX = [Math.min(0, d3.min(this.data, d => d[this.x_key])), d3.max(this.data, d => d[this.x_key])];
-        this.scaleX = d3.scaleLinear(domainX, rangeX).nice();
+        let x_min = d3.min(this.data, d => d[this.x_key]);
+        let x_max = d3.max(this.data, d => d[this.x_key]);
+        if (x_zero === true) {
+            domainX = [(Math.min(0, x_min) - x_pad_left), (x_max + x_pad_right)];
+        } else {
+            domainX = [(x_min - x_pad_left), (x_max + x_pad_right)];
+        }
+        this.scaleX = d3.scaleLinear(domainX, rangeX);
 
         // y-axis - takes lowest value either from dataset or 0
-        let domainY = [Math.min(0, d3.min(this.data, d => d[this.y_key])), d3.max(this.data, d => d[this.y_key])];
-        this.scaleY = d3.scaleLinear(domainY, rangeY).nice();
+        let y_min = d3.min(this.data, d => d[this.y_key]);
+        let y_max = d3.max(this.data, d => d[this.y_key]);
+        if (y_zero === true) {
+            domainY = [((Math.min(0, y_min)) - y_pad_bott), (y_max + y_pad_top)];
+        }else {
+            domainY = [(y_min - y_pad_bott), (y_max + y_pad_top)];
+        }
+        this.scaleY = d3.scaleLinear(domainY, rangeY);
+
+        if (nice === true) {
+            this.scaleX.nice();
+            this.scaleY.nice();
+        }
     }
 
 

@@ -5,7 +5,7 @@ import Chart from './Chart.js';
 
 
 /*
-Class to build Bar charts
+Class to build bar charts
 Extends class Chart
 Uses scaleBand for x-axis
 */
@@ -20,7 +20,7 @@ export default class BarChart extends Chart{
     }
 
 
-    /* Render method to create or update the bar chart
+    /* Class to render bar charts
     - categoryKey: used to look up bar categories
     - categoryCount: used to look up y-axis values
     All other parameters are optional
@@ -46,7 +46,7 @@ export default class BarChart extends Chart{
         rectangles.remove();
 
 
-        // Create D3 rectangles for data binding
+        // Draws
         let barsBinded = rectangles
             .data(data, d => d[this.x_key]) // binds data by category
             .join('rect')
