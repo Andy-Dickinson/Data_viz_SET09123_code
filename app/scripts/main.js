@@ -86,9 +86,51 @@ let grHistoric =[{y:2011,c:8081},
     {y:2020,c:8653}]; 
 
 
-// let linechart1 = new LineChart('div#line1', [50,50,70,30], 900);
-// linechart1.render(grHistoric, 'y', 'c', 'curveLinear', "Year", "Registration Count", false, false, true, 1, 1, 300, 300);
+let linechart1 = new LineChart('div#line1', [50,50,70,30], 900);
+linechart1.render(grHistoric, 'y', 'c', 'curveLinear', "Year", "Registration Count", false, false, true, 1, 1, 300, 300);
 
 
 let pie1 = new Pie_donut('div#pie_donut1', [50,50,70,30], 900);
-pie1.render(grHistoric, 'y', 'c', "Registration Count", "TEST", 0.02, 0.5, 0.5);
+pie1.render(grHistoric, 'y', 'c', 0.02, 0.5, 0.5, "test1", "test2");
+/*
+*/
+
+/*
+// code from main(OLD) - which works but needs translating
+let width = 900;
+let height = 400;
+
+let grHist_sorted = grHistoric.slice().sort((a, b) => d3.ascending(a[`${'y'}`], b[`${'y'}`]));
+
+// selects div element as top level selection
+let pieContainer = d3.select('div#pie_donut1');
+
+// creates svg elements
+let pieSVG = pieContainer.append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .classed('pieChart', true);
+
+// creates a pie generator
+let pieGen = d3.pie().padAngle(0.02)
+    .sort(null).value(d => d.c);
+
+// creates a transformed dataset
+let pieData = pieGen(grHist_sorted);
+
+// creates an arc generator
+// (creates SVG paths representing circles arcs)
+let arcGen = d3.arc()
+    .innerRadius(width/4)
+    .outerRadius(width/2 - 5);
+
+// draws the arcs
+let arcs = pieSVG.selectAll('path')
+    .data(pieData, d => d.data.y)
+    .join('path')
+    .attr('fill', 'cadetblue').attr('fill-opacity', 0.8)
+    .attr('stroke', 'cadetblue').attr('stroke-width', 2)
+    .attr('d', arcGen);
+
+/*
+*/
