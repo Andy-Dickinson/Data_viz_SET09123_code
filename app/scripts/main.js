@@ -6,7 +6,7 @@
 import BarChart from './BarChart.js';
 import BubbleChart from './BubbleChart.js';
 import LineChart from './LineChart.js';
-import Pie_donut from './Pie_donut.js';
+import Pie_donut from './Pienut.js';
 
 let dogsData = [{breed:'Golden Retriever', count:8653, weight: 39.5, height: 56},
     {breed:'Alaskan Malamute', count:261, weight: 36, height: 61},
@@ -87,11 +87,11 @@ let grHistoric =[{y:2011,c:8081},
 
 
 let linechart1 = new LineChart('div#line1', [50,50,70,30], 900);
-linechart1.render(grHistoric, 'y', 'c', 'curveLinear', "Year", "Registration Count", false, false, true, 1, 1, 300, 300);
+linechart1.render(grHistoric, 'y', 'c', 'curveLinear', "Year", "Registration Count", false, false, true, 1, 1, 500, 100);
 
 
 let pie1 = new Pie_donut('div#pie_donut1', [50,50,70,30], 900);
-pie1.render(grHistoric, 'y', 'c', 0.02, 0.5, 0.5, "test1", "test2");
+pie1.render(dogsData, 'breed', 'count');
 /*
 */
 

@@ -8,14 +8,14 @@ import Chart from './Chart.js';
 Class to render pie / donut charts
 Extends class Chart
 */
-export default class Pie_donut extends Chart{
+export default class Pienut extends Chart{
 
     sorted_dataset;
 
     constructor(container, margin=[50,50,50,30], width=600, height=400) {
         super(container, margin, width, height);
 
-        this.svg.classed('pie_donut', true);
+        this.svg.classed('Pienut', true);
     }
 
 
@@ -40,7 +40,7 @@ export default class Pie_donut extends Chart{
 
         // creates a pie generator
         let pieGen = d3.pie().padAngle(padAngle)
-                .sort(null).value(d => d.c);//[slice_size]);
+                .sort(null).value(d => d[slice_size]);
 
         
         // creates a transformed dataset
@@ -49,8 +49,8 @@ export default class Pie_donut extends Chart{
         // creates an arc generator
         // (creates SVG paths representing circles arcs)
         let arcGen = d3.arc()
-                .innerRadius(this.chartWidth/4)//*inner_r_factor)
-                .outerRadius(this.chartWidth/2-5);//outer_r_factor);
+                .innerRadius(this.chartWidth/8)//*inner_r_factor)
+                .outerRadius(this.chartWidth/4-5);//outer_r_factor);
 
         // creates a scale object that associates a colour with each pie element (drawn from built-in scheme 'd3.schemePastel2' (defines set of gentle colors))
         // scaleOrdinal maps discrete domain values to discrete range values
@@ -58,16 +58,17 @@ export default class Pie_donut extends Chart{
         //         .domain( pieData.map(d=>d.index) ); 
 
 
-        let pieG = this.svg.selectAll('g.chart');
-        let piePath = pieG.selectAll('path.pie');
+        let pieG = this.svg.selectAll('g.chart')
+                .attr('transform', `translate(${this.chartWidth / 2}, ${this.chartHeight / 2})`);
+        // let piePath = pieG.selectAll('path.pie');
 
         // Remove existing paths before rendering new ones
-        piePath.remove();
+        // piePath.remove();
 
         
         // draws the arcs
         let arcs = pieG.selectAll('path')
-            .data(pieData, d => d.data.y)//[slice])
+            .data(pieData)
             .join('path')
             .classed('pie', true)
             .attr('fill', 'cadetblue').attr('fill-opacity', 0.8)
@@ -83,7 +84,7 @@ export default class Pie_donut extends Chart{
 // code from main OLD - which works but needs translating
 render(data){
 // selects div element as top level selection
-let pieContainer = d3.select('div#pie_donut');
+let pieContainer = d3.select('div#Pienut');
 
 // creates svg elements
 let pieSVG = pieContainer.append('svg')

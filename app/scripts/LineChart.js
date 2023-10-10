@@ -40,7 +40,7 @@ export default class LineChart extends Chart{
     */
     render(data, x_key, y_key, curveType, x_title, y_title, x_zero, y_zero, nice, x_pad_left, x_pad_right, y_pad_bott, y_pad_top, x_tickSize, y_tickSize, lineWidth=3) {
 
-
+// add way to hide end ticks, probably as method in chart ----------------------------------------------------------------------------------------
         // sets keys dependent on if keys are passed as list of strings or a string
         if (typeof(x_key) === "string") {
             this.x_key = `${x_key}`;

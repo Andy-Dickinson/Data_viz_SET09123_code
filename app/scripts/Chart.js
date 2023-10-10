@@ -39,6 +39,9 @@ export default class Chart {
         this.height = height;
         this.margin = margin;
 
+        this.chartWidth = this.width - this.margin[2] - this.margin[3],
+        this.chartHeight = this.height - this.margin[0] - this.margin[1];
+
         // Create an SVG element inside the container
         this.svg = d3.select(container)
             .append('svg')
@@ -71,9 +74,6 @@ export default class Chart {
 
         let domainX;
         let domainY;
-
-        this.chartWidth = this.width - this.margin[2] - this.margin[3],
-        this.chartHeight = this.height - this.margin[0] - this.margin[1];
 
         let rangeX = [0, this.chartWidth],
             rangeY = [this.chartHeight, 0]; // accounts for upside down mapping
