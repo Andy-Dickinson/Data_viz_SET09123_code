@@ -4,137 +4,287 @@
 Creates chart contained within g element, contained in SVG inside container passed
 Margins are applied by transforming the g element within the svg element
 Defines function to set linear scales - accounts for upside down mapping of y-axis
-Defines function to add axes
+Defines function to calculate scales and domain
+Defines function to add and create axes
 Axes titles are a text element within the SVG element
+Defines function to set a colourScale
 Specific charts are rendered from their relevant classes
 */
 export default class Chart {
 
     data;
-    svg; 
-    width; // width of SVG element
-    height; // height of SVG element
-    chart; // g element containing chart
-    axisX; // g element containing x-axis
-    axisY; // g element containing y-axis
-    chartHeight;
-    chartWidth;
-    margin; // array for margins around chart g element [top, bottom, left, right], applied as a transformation
-    x_key;
-    y_key;
-    scaleX;
-    scaleY;
+    svg; svg_width; svg_height;               // svg - visualisation element
+    chart;                                  // g element containing chart
+    chart_height; chart_width; chart_margin;   // chart element, margin is array [top, bottom, left, right], applied as a transformation
+    axis_x; axis_y;                           // g elements for axes
+    x_key; y_key;                           // template literal string
+    scale_x; scale_y;                         // scales
+    colour_scale;
+    _click; _mouseover; _mouseout;  // events
+    _tipText_f; _tips_ref;         // tooltips
+    _ia_sel;  _ia_key;             // interaction selection and key used to access data for interactions, sel set in child classes after drawing (as has exit behaviour), key set in setData to x_key, view data attached to selection with logging _ia_sel.data()
 
 
     /*
     Constructor for Chart
     - container: DOM selector
-    - margin: chart area margins [top, bottom, left, right]
-    - width: visualisation width
-    - height: visualisation height
+    - chart_margin: chart area margins [top, bottom, left, right]
+    - svg_width: visualisation Width
+    - svg_height: visualisation Height
     */
-    constructor(container, margin=[50,50,60,30], width=800, height=500) {
-        // initialize width, height and margin
-        this.width = width;
-        this.height = height;
-        this.margin = margin;
+    constructor(container, chart_margin=[50,50,60,30], svg_width=800, svg_height=500) {
 
-        this.chartWidth = this.width - this.margin[2] - this.margin[3],
-        this.chartHeight = this.height - this.margin[0] - this.margin[1];
+        // Initialize svg_width, svg_height and chart_margin
+        this.svg_width = svg_width;
+        this.svg_height = svg_height;
+        this.chart_margin = chart_margin;
+
+        this.chart_width = this.svg_width - this.chart_margin[2] - this.chart_margin[3],
+        this.chart_height = this.svg_height - this.chart_margin[0] - this.chart_margin[1];
+
+        
+        // Initialize event handlers and tooltips to empty functions or provide default behaviors
+        this._click = () => {};
+        this._mouseover = () => {};
+        this._mouseout = () => {};
+        this._tipText_f = null;
+        this._tips_ref = [];
+
 
         // Create an SVG element inside the container
         this.svg = d3.select(container)
             .append('svg')
-            .attr('width', this.width)
-            .attr('height', this.height)
+            .attr('width', this.svg_width)
+            .attr('height', this.svg_height)
             .classed('viz', true);
 
-        // appends g element and adds margins
+
+        // Appends g element and adds margins
         this.chart = this.svg.append('g')
-            .attr('transform', `translate(${this.margin[2]},${this.margin[0]})`) // moves g element right by left margin and down by top margin
+            .attr('transform', `translate(${this.chart_margin[2]},${this.chart_margin[0]})`) // Moves g element right by left chart_margin and down by top chart_margin
             .classed('chart', true);
 
-        this.axisX = this.svg.append('g')
-            .attr('transform', `translate(${this.margin[2]}, ${this.height - this.margin[1]})`) // moves x-axis right by left margin and down by (height of svg - bottom margin)
+        this.axis_x = this.svg.append('g')
+            .attr('transform', `translate(${this.chart_margin[2]}, ${this.svg_height - this.chart_margin[1]})`) // Moves x-axis right by left chart_margin and down by (height of svg - bottom chart_margin)
             .classed('axis-x', true);
 
-        this.axisY = this.svg.append('g')
-        .attr('transform', `translate(${this.margin[2]}, ${ this.margin[0]})`) // moves y-axis right by left margin and down by (height - top margin)
+        this.axis_y = this.svg.append('g')
+        .attr('transform', `translate(${this.chart_margin[2]}, ${ this.chart_margin[0]})`) // Moves y-axis right by left chart_margin and down by top chart_margin
         .classed('axis-y', true);
     }
 
 
 
-
-    /* sets scales linear, uses nice() method by default
-        When x_zero / y_zero are false, uses data to define axis min
-        padding options adjusts domains so datapoints are not at chart edges
+    /* Set data, x_key, and y_key
+    keys are set as template literals
     */
-    updateScalesLinear(x_zero=true, y_zero=true, nice=true, x_pad_left=0, x_pad_right=0, y_pad_bott=0, y_pad_top=0) {
+    setData(data, x_key, y_key) {
+        this.data = data;
+        this.x_key = `${x_key}`;
+        this.y_key = `${y_key}`;
 
-        let domainX;
-        let domainY;
+        this.setInterKey(this.x_key);
+    }
 
-        let rangeX = [0, this.chartWidth],
-            rangeY = [this.chartHeight, 0]; // accounts for upside down mapping
 
-        // x-axis - takes lowest value either from dataset or 0
-        let x_min = d3.min(this.data, d => d[this.x_key]);
-        let x_max = d3.max(this.data, d => d[this.x_key]);
-        if (x_zero === true) {
-            domainX = [(Math.min(0, x_min) - x_pad_left), (x_max + x_pad_right)];
+    /* Update linear scales for X and Y axes
+    For x and y zero: when false, takes data min as domain min, when true, takes lowest of 0 or datamin
+    */
+    updateScalesLinear(include_x_domain_zero = true, include_y_domain_zero = true, nice, axis_pad = [0, 0, 0, 0]) {
+        this.scale_x = this.calculateScale(this.data, this.x_key, [0, this.chart_width], include_x_domain_zero, nice, axis_pad.slice(0, 2));
+        this.scale_y = this.calculateScale(this.data, this.y_key, [this.chart_height, 0], include_y_domain_zero, nice, axis_pad.slice(2, 4));
+    }
+
+
+    // Calculate a linear scale with optional nice() method
+    calculateScale(data, key, range, include_domain_zero, nice = true, axis_pad) {
+        const domain = this.calculateDomain(data, key, include_domain_zero, axis_pad);
+        const scale = d3.scaleLinear().domain(domain).range(range);
+        if (nice) {
+            scale.nice();
+        }
+        return scale;
+    }
+
+
+    /* Calculate the domain for a scale
+    When include_domain_zero is false, domain min is taken from data min
+    axis_pad adds padding to the domain effectively increasing the axis to fit the data away from the edges
+    */
+    calculateDomain(data, key, include_domain_zero = true, axis_pad = [0, 0]) {
+        const min = d3.min(data, d => d[key]);
+        const max = d3.max(data, d => d[key]);
+        if (include_domain_zero) {
+            return [Math.min(0, min) - axis_pad[0], max + axis_pad[1]];
         } else {
-            domainX = [(x_min - x_pad_left), (x_max + x_pad_right)];
-        }
-        this.scaleX = d3.scaleLinear(domainX, rangeX);
-
-        // y-axis - takes lowest value either from dataset or 0
-        let y_min = d3.min(this.data, d => d[this.y_key]);
-        let y_max = d3.max(this.data, d => d[this.y_key]);
-        if (y_zero === true) {
-            domainY = [((Math.min(0, y_min)) - y_pad_bott), (y_max + y_pad_top)];
-        }else {
-            domainY = [(y_min - y_pad_bott), (y_max + y_pad_top)];
-        }
-        this.scaleY = d3.scaleLinear(domainY, rangeY);
-
-        if (nice === true) {
-            this.scaleX.nice();
-            this.scaleY.nice();
+            return [min - axis_pad[0], max + axis_pad[1]];
         }
     }
 
 
+    /* Adds axes and axes titles (if defined)
+    Titles are a text element within the SVG element
+    */
+    addAxes(x_title = undefined, y_title = undefined, x_tickSize = 6, y_tickSize = 6) {
+        this.createAxis(this.scale_x, this.axis_x, x_title, x_tickSize, 'bottom'); // Use 'bottom' for x-axis
+        this.createAxis(this.scale_y, this.axis_y, y_title, y_tickSize, 'left'); // Use 'left' for y-axis
+    }
 
-    // Adds axes and axes titles (if defined)
-    // Titles are a text element within the SVG element
-    addAxes(x_title=undefined, y_title=undefined, x_tickSize=6, y_tickSize=6) {
+    
+    // Create an axis using the specified scale and add an optional title
+    createAxis(scale, axis, title, tick_size, position) {
+        const axisGenerator = position === 'bottom' ? d3.axisBottom(scale).tickSize(tick_size) : d3.axisLeft(scale).tickSize(tick_size);
+        axis.call(axisGenerator);
 
-        let xAxis = d3.axisBottom(this.scaleX).tickSize(x_tickSize),
-            yAxis = d3.axisLeft(this.scaleY).tickSize(y_tickSize);
-
-        this.axisX.call(xAxis);
-        this.axisY.call(yAxis);
-
-        if (x_title !== undefined) {
-        // x-axis title
-        this.svg.append("text")
-                .attr("class", "x-axis-title")
-                .attr("text-anchor", "middle")
-                .attr("x", (this.chartWidth / 2) + this.margin[2]) // center of chart + left margin
-                .attr("y", this.height - (this.margin[1] / 4)) // 1/4 of the bottom margin up from the bottom of svg chart
-                .text(x_title);
+        if (title !== undefined) {
+            this.createAxisTitle(title, scale, position);
         }
+    }
 
-        if (y_title !== undefined) {
-            // y-axis title
-            this.svg.append("text")
-                .attr("class", "y-axis-title")
-                .attr("text-anchor", "middle")
-                .attr("x", -(this.chartHeight / 2) - this.margin[0]) // center of chart - top margin
-                .attr("y", 3*(this.margin[3] / 4)) // 3/4 of the left margin
-                .attr("transform", "rotate(-90)") // rotate the text to be vertical
-                .text(y_title);
+
+    // Create an axis title and rotate if it's a Y-axis title
+    createAxisTitle(title, scale) {
+        // X axis title: x = center of chart + left chart margin, y = 1/4 of the bottom chart margin up from the bottom of svg chart
+        // Y axis title: x = center of chart - top chart_margin, y = 3/4 of the left chart_margin
+        const x = scale === this.scale_x ? this.chart_width / 2 + this.chart_margin[2] : -(this.chart_height / 2) - this.chart_margin[0];
+        const y = scale === this.scale_x ? this.svg_height - this.chart_margin[1] / 4 : 3 * (this.chart_margin[3] / 4);
+
+        this.svg.append('text')
+            .attr('class', 'axis-title')
+            .attr('text-anchor', 'middle')
+            .attr('x', x)
+            .attr('y', y)
+            .attr('transform', scale === this.scale_x ? '' : 'rotate(-90)')
+            .text(title);
+    }
+
+
+    // Set the color scale
+    setColourScale(domain, range = 'schemeSet2', scale = 'scaleOrdinal') {
+        this.colour_scale = d3[`${scale}`]()
+            .domain(domain)
+            .range(d3[`${range}`]);
+    }
+
+
+    /*
+    Updates event handlers
+    */
+    updateEvents() {
+        // First params has to be event type want to listen to
+        // Second params is callback (executed when event occurs) - typically has two params: event obj and dataum attached to ele triggering event
+        this.getInterSel().on('click', (event, datum) => {
+                this._click(datum[this.getInterKey()]); // changes clicked attribute
+            })
+            .on('mouseover', (event, datum) => {
+                this._mouseover(datum[this.getInterKey()]);
+            })
+            .on('mouseout', (event, datum) => {
+                this._mouseout(datum[this.getInterKey()]);
+            })
+    }
+
+
+    /*
+    Adds tooltips
+    */
+    updateTooltips() {
+        // destroys any previously defined tooltips
+        this._tips_ref.forEach(t => t.destroy());
+
+        // only adds tooltips if accessor is not null
+        if (this._tipText_f) {
+            
+            this.getInterSel().attr('data-tippy-content', this._tipText_f);
+            this._tips_ref = tippy(this.getInterSel().nodes());
         }
+    }
+
+
+    /*
+    Highlights bars based on key values passed provided
+    - keyValues: list of key values to search for and highlight related bars
+    */
+    highlightSelection(keyValues = []) {
+        this.getInterSel().classed('highlight', false)
+            .filter(d=>keyValues.includes(d[this.getInterKey()]))
+            .classed('highlight', true);
+        return this;
+    }
+
+
+    /*
+    Public setter to change click callback
+    - f: callback function to set for click 
+    e.g. k=>{barchart1.highlightSelection([k]);} where k would be the key value passed in by the datum inupdateEvents
+    */
+    setClick(f = ()=>{}) {
+        this._click = f;
+        this.updateEvents(); // registers callback on selection
+        return this;
+    }
+
+
+    /*
+    Public setter to change mouseover callback
+    */
+    setMouseover(f = ()=>{}) {
+        this._mouseover = f;
+        this.updateEvents();
+        return this;
+    }
+
+
+    /*
+    Public setter to change mouseout callback
+    */
+    setMouseout(f = ()=>{}) {
+        this._mouseout = f;
+        this.updateEvents();
+        return this;
+    }
+
+    
+    /*
+    Set interaction selection
+    */
+    setInterSel(selection) {
+        this._ia_sel = selection;
+    }
+
+
+    /*
+    Retrives interactive selection
+    */
+    getInterSel() {
+        return this._ia_sel;
+    }
+
+
+    /*
+    Set interaction key
+    */
+    setInterKey(key) {
+        this._ia_key = key;
+    }
+
+
+    /*
+    Retrives interaction key
+    */
+    getInterKey() {
+        return this._ia_key;
+    }
+
+
+    /*
+    Sets accessor function to create tooltip text based on datum of elements
+    e.g. d=>`${d.k}: ${d.v}` 
+    default should be null to avoid creating empty tooltips
+    */
+    setTooltip(f = null) {
+        this._tipText_f = f;
+        this.updateTooltips();
+        return this;
     }
 }

@@ -1,0 +1,47 @@
+/* --- might have several stylesheets, each dedicated to one aspect of your page (text, layout, input, etc.) or later on one per visualisation module. SEE vars.css stylesheet for variables */
+
+@import 'barchart.css';
+@import 'linechart.css';
+@import 'scatter.css';
+@import 'map.css';
+@import 'burst.css';
+
+body, html {
+    margin: 0;
+    padding: 0;
+
+    /* REMOVE IF TROUBLE SEEING EVERYTHING IN SCREEN AND NEED TO SCROLL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+    overflow: hidden;
+}
+
+#dashboard {
+    border: solid 1px #333;
+
+    /* This works (but fixed size) if each charts svg_width is set to 590, and svg_height is 389 and svg.viz (below) margin is 3px 
+    Flex would be better for this, however the charts would need rewritten as width and height are fixed*/
+    /* width: 1800px;
+    height: 800px; */
+    
+
+    display: flex;
+    flex-wrap: wrap;
+    
+}
+
+/* styles all visualisations (svg elements with class 'viz') */
+svg.viz {
+    border: solid 1px #333;
+    margin-top: calc((3 / 800) * 100vh);
+    margin-bottom: calc((3 / 800) * 100vh);
+    margin-left: calc((5 / 1800) * 100vw);
+    margin-right: calc((2 / 1800) * 100vw);
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+/* font for axes titles */
+svg.viz > text {
+    font-size: larger;
+    font-weight: bold;
+}
+
+

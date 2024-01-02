@@ -1,0 +1,11 @@
+/* gives each point a larger radius and different coloured border and fill when have class hightlight (by event)*/
+g.points > circle.point{
+
+    &.highlight {
+    stroke-width: 2px !important; /*overrides inline styling*/
+    stroke: #282828 !important;
+    fill: lightgreen !important;
+    r: 10;
+    }
+}
+

@@ -2,10 +2,29 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="30a2f39b-7ed0-47d9-8e02-ea0bb4c9db4e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/CW/part1/SET09123_IDV_CW_dataset.csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/scripts/main(OLD).js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/scripts/BarChart.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/scripts/BarChart.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/scripts/BubbleChart.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/scripts/BubbleChart.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/scripts/Chart.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/scripts/Chart.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/scripts/LineChart.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/scripts/LineChart.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/scripts/Pienut.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/scripts/Pienut.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/scripts/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/scripts/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/styles/barchart.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/styles/barchart.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/styles/bubblechart.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/styles/bubblechart.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/styles/line1.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/styles/line1.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/styles/pie_donut.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/styles/pie_donut.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/data/sales.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/libs/d3.v7.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/libs/popper.v2.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/libs/tippy.v6.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/scripts/main.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/scripts/visualisation/Barchart.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/scripts/visualisation/Piechart.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/styles/barchart.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/styles/main.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simons_examples/styles/piechart.css" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,6 +58,7 @@
       <workItem from="1696346108565" duration="33000" />
       <workItem from="1696427065645" duration="9000" />
       <workItem from="1696515539003" duration="8000" />
+      <workItem from="1698667529565" duration="127000" />
     </task>
     <servers />
   </component>

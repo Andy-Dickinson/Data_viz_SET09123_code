@@ -1,3 +1,24 @@
+/*
+CSS specificity priority:
+
+Inline Styles: Styles applied directly to an element using the style attribute have the highest specificity.
+
+ID Selectors: Selectors that use IDs (e.g., #myElement) have higher specificity than class selectors.
+
+Class Selectors: Selectors that use class names (e.g., .myClass) have lower specificity than ID selectors but higher specificity than type selectors.
+
+Type (Element) Selectors: Selectors that target HTML elements (e.g., div, p, a) have the lowest specificity.
+
+Combinators: Combinators like the child combinator > increase specificity because they add another level of hierarchy to the selector.
+
+
+/* gives bars a thicker and different coloured border when have class hightlight (by event)*/
+g.chart > rect.bar.highlight{
+    stroke-width: 2px;
+    stroke: #282828;
+    fill: lightgreen;
+}
+
 /* adds a rule for the bars themselves - fill and stroke (outline colour and width) 
 selects all rectangles with class bar, where parent is a g element with class chart*/
 g.chart > rect.bar {
@@ -5,3 +26,4 @@ g.chart > rect.bar {
     stroke: #d3210d;
     stroke-width: 2px;
 }
+

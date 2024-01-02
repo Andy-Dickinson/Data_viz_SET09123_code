@@ -1,157 +1,201 @@
 'use strict';
 
-// imports classes
+// Imports classes
 import Chart from './Chart.js';
 
 
 /*
 Class to render pie / donut charts
 Extends class Chart
+Could rework how labels are generated, as if too long, or segments squished, they get on top of each other - but can also adjust with CSS targeting text.label
 */
 export default class Pienut extends Chart{
 
     sorted_dataset;
+    chart_size;             // Based on smallest chart size
+    slice; slice_size;      // Pie segment keys: category and count
+    label_space;
+    pie_paths; pie_labels;  // element selection
 
-    constructor(container, margin=[50,50,50,30], width=600, height=400) {
-        super(container, margin, width, height);
 
-        this.svg.classed('Pienut', true);
+    constructor(container, chart_margin=[50,50,50,30], svg_width=600, svg_height=400, label_space=50) {
+        super(container, chart_margin, svg_width, svg_height);
+
+        // Not required for pie chart
+        this.axis_x.remove();
+        this.axis_y.remove();
+
+        this.label_space = label_space;
+
+        // Transforms specifically for pie chart (different to other charts)
+        this.chart
+            .attr('transform', `translate(${this.chart_margin[2]+this.chart_width/2},${this.chart_margin[0]+this.chart_height/2})`)    
+            
+        this.chart_size = Math.min(this.chart_width, this.chart_height) - this.label_space*2;
+
+        this.svg.classed('pienut', true);
+        this.pie_paths = this.chart.selectAll('path.pie');
+        this.pie_labels = this.chart.selectAll('text.label')
     }
 
 
-    /* Class to render pie / donut charts
-    - categoryKey is used to determine segments
-    - categoryCount determines segment size
-    All other parameters are optional
-    inner/outer_r_factor: factors the radius of the pie based on chart width
-    Tick sizes default to 6
-    */
+
+    /* Render a pie/donut chart
+
+    Parameters:
+    - data: 1d list of dicts
+    - category_key: defines key for pie segment categories, as string
+    - category_count: defines key for determining size of each segment, as string
    
-    render(data, categoryKey, categoryCount, padAngle=0.02, inner_r_factor=0.2, outer_r_factor=1, x_title, y_title) {
-
+    Optional params (provide as dict):
+        - pad_angle: padding between segments, defaults 0.02
+        - inner_r_factor: factor of chart_size for inner radius, defaults 0.25
+        - outer_r_factor: factor of chart_size for outer radius, defaults 0.5
+        - colour_scale: must be d3 built in colour scale provided as string, defaults 'scaleOrdinal'
+        - colour_range: must be d3 built in colour range provided as string, defaults 'schemeSet2'
+    */
+    render(data, category_key, category_count, {pad_angle, inner_r_factor, outer_r_factor, colour_scale, colour_range} = {}) {
+        // Set data, category_key, and category_count
         this.data = data;
-        
-        // -----------------Titles need doing differently ----------------------------------------------
+        this.slice = `${category_key}`;
+        this.slice_size = `${category_count}`;
+        super.setInterKey(this.slice);
 
-        let slice = `${categoryKey}`;
-        let slice_size = `${categoryCount}`;
+        // Sort the dataset based on category_key
+        this.sorted_dataset = this.data.slice().sort((a, b) => d3.ascending(a[this.slice], b[this.slice]));
 
-        this.sorted_dataset = this.data.slice().sort((a, b) => d3.ascending(a[slice], b[slice]));
+        // Generators and colour scale
+        const pieData = this.createPieGen(pad_angle)(this.sorted_dataset);   // Transformed dataset
+        let arcGen = this.createArcGen(inner_r_factor, outer_r_factor);
+        super.setColourScale(pieData.map(d=>d.index), colour_range, colour_scale);
 
-        // creates a pie generator
-        let pieGen = d3.pie().padAngle(padAngle)
-                .sort(null).value(d => d[slice_size]);
+        // Draw the pie segments
+        this.drawArcs(pieData, arcGen);
 
-        
-        // creates a transformed dataset
-        let pieData = pieGen(this.sorted_dataset);
+        // Update arc generator for adding labels
+        arcGen = this.createArcGen(inner_r_factor, outer_r_factor, this.label_space);
 
-        // creates an arc generator
-        // (creates SVG paths representing circles arcs)
-        let arcGen = d3.arc()
-                .innerRadius(this.chartWidth/8)//*inner_r_factor)
-                .outerRadius(this.chartWidth/4-5);//outer_r_factor);
+        // Draw labels for pie segments
+        this.drawLabels(pieData, arcGen);
 
-        // creates a scale object that associates a colour with each pie element (drawn from built-in scheme 'd3.schemePastel2' (defines set of gentle colors))
-        // scaleOrdinal maps discrete domain values to discrete range values
-        // var scC = d3.scaleOrdinal( d3.schemePastel2 ) 
-        //         .domain( pieData.map(d=>d.index) ); 
+        // Sets interaction selection (as drawBars has an exit behaviour oddly)
+        this.setInterSel(this.pie_paths);
+
+        // Adds events
+        this.updateEvents(); // Overrides parent method
+
+        // Adds tooltips
+        this.updateTooltips(); // Overrides parent method
+
+        return this;
+    }
+ 
+
+    // Create a pie generator
+    createPieGen(pad_angle = 0.02) {
+        return d3.pie()
+            .padAngle(pad_angle)
+            .sort(null)
+            .value(d => d[this.slice_size]);
+    }
 
 
-        let pieG = this.svg.selectAll('g.chart')
-                .attr('transform', `translate(${this.chartWidth / 2}, ${this.chartHeight / 2})`);
-        // let piePath = pieG.selectAll('path.pie');
+    /* Create an arc generator
+    label_space param is used when adjusting radius for label space
+    */
+    createArcGen(inner_r_factor = 0.25, outer_r_factor = 0.5, label_space = 0) {
+        return d3.arc()
+            .innerRadius(this.chart_size * inner_r_factor + label_space)
+            .outerRadius(this.chart_size * outer_r_factor + label_space);
+    }
 
-        // Remove existing paths before rendering new ones
-        // piePath.remove();
 
-        
-        // draws the arcs
-        let arcs = pieG.selectAll('path')
-            .data(pieData)
-            .join('path')
-            .classed('pie', true)
-            .attr('fill', 'cadetblue').attr('fill-opacity', 0.8)
-            .attr('stroke', 'cadetblue').attr('stroke-width', 2)
-            .attr('d', arcGen);
+    // Draw pie segments
+    drawArcs(pieData, arcGen) {
+
+        this.pie_paths = this.pie_paths.data(pieData)
+                .join('path')
+                .classed('pie', true)
+                .attr('d', arcGen)
+                .attr('fill', d => this.colour_scale(d.index))
+                .attr('stroke', 'grey');
+    }
+
+
+    // Draw labels for pie segments
+    drawLabels(pieData, arcGen) {
+
+        this.pie_labels = this.pie_labels.data(pieData, d => d.data[this.slice])
+                .join('text')
+                .classed('label', true)
+                .attr('transform', d => `translate(${arcGen.centroid(d)})`)
+                .style('text-anchor', 'middle')
+                .text(d => d.data[this.slice]);
+    }
+
+
+    /*
+    Updates event handlers
+    Overrides parent method
+    */
+    updateEvents() {
+        var sele = super.getInterSel();
+        var key = super.getInterKey();
+        // First params has to be event type want to listen to
+        // Second params is callback (executed when event occurs) - typically has two params: event obj and dataum attached to ele triggering event
+        sele.on('click', (event, datum) => {
+                this._click(datum.data[key]); // changes clicked attribute
+            })
+            .on('mouseover', (event, datum) => {
+                this._mouseover(datum.data[key]);
+            })
+            .on('mouseout', (event, datum) => {
+                this._mouseout(datum.data[key]);
+            })
+    }
+
+
+    /*
+    Sets accessor function to create tooltip text based on datum of elements
+    e.g. d=>`${d.k}: ${d.v}` 
+    default should be null to avoid creating empty tooltips
+    Overrides parent method
+    */
+    setTooltip(f = null) {
+        this._tipText_f = f;
+        this.updateTooltips();  // Overrides parent method
+        return this;
+    }
+
+
+    /*
+    Adds tooltips
+    Overrides parent method
+    */
+    updateTooltips() {
+        var sele = super.getInterSel();
+
+        // destroys any previously defined tooltips
+        this._tips_ref.forEach(t => t.destroy());
+
+        // only adds tooltips if accessor is not null
+        if (this._tipText_f) {
+            
+            sele.attr('data-tippy-content', d=>this._tipText_f(d.data));
+            this._tips_ref = tippy(sele.nodes());
+        }
+    }
+
+
+    /*
+    Highlights bars based on key values passed provided
+    - keyValues: list of key values to search for and highlight related bars
+    Overrides parent method
+    */
+    highlightSelection(keyValues = []) {
+        super.getInterSel().classed('highlight', false)
+            .filter(d=>keyValues.includes(d.data[super.getInterKey()]))
+            .classed('highlight', true);
+        return this;
     }
 }
-/*
-*/
-
-
-/*
-// code from main OLD - which works but needs translating
-render(data){
-// selects div element as top level selection
-let pieContainer = d3.select('div#Pienut');
-
-// creates svg elements
-let pieSVG = pieContainer.append('svg')
-    .attr('this.chart', this.chartWidth)
-    .attr('height', this.chartHeight)
-    .classed('pieChart', true);
-
-// creates a pie generator
-let pieGen = d3.pie().padAngle(0.02)
-    .sort(null).value(d => d.c);
-
-// creates a transformed dataset
-let pieData = pieGen(data);
-
-// creates an arc generator
-// (creates SVG paths representing circles arcs)
-let arcGen = d3.arc()
-    .innerRadius(this.chartWidth/4)
-    .outerRadius(this.chartWidth/2 - 5);
-
-// draws the arcs
-let arcs = pieSVG.selectAll('path')
-    .data(pieData, d => d.data.y)
-    .join('path')
-    .attr('fill', 'cadetblue').attr('fill-opacity', 0.8)
-    .attr('stroke', 'cadetblue').attr('stroke-width', 2)
-    .attr('d', arcGen);
-}
-}
-/*
-*/
-
-
-
-
-
-
-/*
-// code from book - which also works
- // creates instance of the pie layout, configures it, and invokes on dataset. (transforms the data)
-    // returns an array of objects with one object for each record in original dataset. Each contains reference to original data, start and end angles of associated slice
-    var pie = d3.pie().value(d=>d.votes).padAngle(0.025)( data );
-
-    // creates and configures an arc generator. Used to take transformed dataset and create svg path
-    var arcMkr = d3.arc().innerRadius( 50 ).outerRadius( 140 )
-        .cornerRadius(10);
-
-    // creates a scale object that associates a colour with each pie element (drawn from built-in scheme 'd3.schemePastel2' (defines set of gentle colors))
-    // scaleOrdinal maps discrete domain values to discrete range values
-    var scC = d3.scaleOrdinal( d3.schemePastel2 ) 
-        .domain( pie.map(d=>d.index) ) 
-
-    // selects destination element, appends g element and moves into position
-    var g = d3.select( "#pie" )
-        .append( "g" ).attr( "transform", "translate(300, 150)" )
-
-    g.selectAll( "path" ).data( pie ).enter().append( "path" ) // binds
-        .attr( "d", arcMkr ) // invokes generator
-        .attr( "fill", d=>scC(d.index) ).attr( "stroke", "grey" );
-
-    // adds text labels to slices
-    g.selectAll( "text" ).data( pie ).enter().append( "text" ) 
-        .text( d => d.data.name )
-        .attr( "x", d=>arcMkr.innerRadius(70).centroid(d)[0] ) // centroid() returns coordinates of center of each pie slice. Here we are moving label towards rim
-        .attr( "y", d=>arcMkr.innerRadius(70).centroid(d)[1] )
-        .attr( "font-family", "sans-serif" ).attr( "font-size", 14 )
-        .attr( "text-anchor", "middle" );
-}
-/*
-*/

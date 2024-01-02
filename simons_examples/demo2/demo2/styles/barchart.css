@@ -1,0 +1,12 @@
+svg.barchart{
+
+    border: solid 1px grey;
+
+    & rect.bar {
+        fill: teal;
+
+        &.highlight{
+            fill: tomato;
+        }
+    }
+}

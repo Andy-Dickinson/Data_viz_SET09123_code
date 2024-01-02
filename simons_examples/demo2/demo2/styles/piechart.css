@@ -1,0 +1,17 @@
+svg.piechart{
+
+    border: solid 1px grey;
+
+    & path.arc {
+        fill: teal;
+
+        &.highlight{
+            fill: tomato;
+        }
+    }
+
+    & text.label {
+        font-family: sans-serif;
+        text-anchor: middle;
+    }
+}
