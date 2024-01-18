@@ -1,9 +1,0 @@
-/* gives each slice a thicker and different coloured border when have class hightlight (by event)*/
-g.chart > path.pie{
-
-    &.highlight {
-    stroke-width: 2px;
-    stroke: #282828;
-    fill: lightgreen;
-    }
-}
